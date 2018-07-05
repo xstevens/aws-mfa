@@ -19,7 +19,7 @@ type awsCredentials struct {
 	Expiration      *time.Time
 }
 
-func newStsCredsWithMFA(config *aws.Config, serial string) (*awsCredentials, error) {
+func newStsCredsWithMFA(config *aws.Config, serial string, tokenDuration int64) (*awsCredentials, error) {
 	sess := session.Must(session.NewSession(config))
 	token, err := prompt("AWS MFA code: ")
 	if err != nil {
@@ -28,8 +28,9 @@ func newStsCredsWithMFA(config *aws.Config, serial string) (*awsCredentials, err
 	}
 	svc := sts.New(sess)
 	sessTokenInput := &sts.GetSessionTokenInput{
-		SerialNumber: aws.String(serial),
-		TokenCode:    aws.String(token),
+		SerialNumber:    aws.String(serial),
+		TokenCode:       aws.String(token),
+		DurationSeconds: aws.Int64(tokenDuration),
 	}
 	sessTokenOutput, err := svc.GetSessionToken(sessTokenInput)
 	if err != nil {

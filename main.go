@@ -42,6 +42,7 @@ func main() {
 
 	region := app.Flag("region", "AWS Region.").Default(getEnvWithDefault("AWS_DEFAULT_REGION", "us-west-2")).String()
 	roleArn := app.Flag("role", "AWS IAM Role.").String()
+	tokenDuration := app.Flag("duration", "AWS STS token duration (in seconds).").Default("43200").Int64()
 	var command []string
 	app.Arg("command", "The command to execute").Required().StringsVar(&command)
 
@@ -86,7 +87,7 @@ func main() {
 		}
 		creds := credentials.NewStaticCredentialsFromCreds(*credsVal)
 		config := aws.NewConfig().WithRegion(*region).WithCredentials(creds)
-		tmpCreds, err = newStsCredsWithMFA(config, ltCreds.MfaSerial)
+		tmpCreds, err = newStsCredsWithMFA(config, ltCreds.MfaSerial, *tokenDuration)
 		must(err)
 
 		// store temporary credentials in keychain
