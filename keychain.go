@@ -8,14 +8,14 @@ import (
 	keychain "github.com/keybase/go-keychain"
 )
 
-func storeCreds(serial string, creds *awsCredentials) error {
+func storeCreds(account string, creds *awsCredentials) error {
 	if creds != nil {
 		data, err := json.Marshal(creds)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to serialize credentials: %v\n", err)
 			return err
 		}
-		item := keychain.NewGenericPassword("aws-mfa", serial, "", data, "")
+		item := keychain.NewGenericPassword("aws-mfa", account, "", data, "")
 		err = keychain.AddItem(item)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to store credentials in keychain: %v\n", err)
@@ -24,6 +24,10 @@ func storeCreds(serial string, creds *awsCredentials) error {
 	}
 
 	return nil
+}
+
+func deleteCreds(account string) error {
+	return keychain.DeleteGenericPasswordItem("aws-mfa", account)
 }
 
 func loadCreds(account string) (*awsCredentials, error) {

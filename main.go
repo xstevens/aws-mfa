@@ -73,6 +73,12 @@ func main() {
 	// check if STS temporary credentials are in keychain and haven't expired
 	tmpCreds, err := loadCreds(ltCreds.MfaSerial)
 	if err != nil || tmpCreds.Expiration.Before(time.Now()) {
+		// if creds have expired we need to remove them from keychain
+		// before we can store new ones
+		if tmpCreds.Expiration.Before(time.Now()) {
+			deleteCreds(ltCreds.MfaSerial)
+		}
+
 		// initiate a session to obtain temporary credentials
 		credsVal := &credentials.Value{
 			AccessKeyID:     ltCreds.AccessKeyID,
@@ -80,7 +86,7 @@ func main() {
 		}
 		creds := credentials.NewStaticCredentialsFromCreds(*credsVal)
 		config := aws.NewConfig().WithRegion(*region).WithCredentials(creds)
-		tmpCreds, err := newStsCredsWithMFA(config, ltCreds.MfaSerial)
+		tmpCreds, err = newStsCredsWithMFA(config, ltCreds.MfaSerial)
 		must(err)
 
 		// store temporary credentials in keychain
