@@ -76,7 +76,7 @@ func main() {
 	if err != nil || tmpCreds.Expiration.Before(time.Now()) {
 		// if creds have expired we need to remove them from keychain
 		// before we can store new ones
-		if tmpCreds.Expiration.Before(time.Now()) {
+		if tmpCreds != nil && tmpCreds.Expiration.Before(time.Now()) {
 			deleteCreds(ltCreds.MfaSerial)
 		}
 
