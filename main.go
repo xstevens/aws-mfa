@@ -31,13 +31,14 @@ func execCommandWithEnv(command []string, env []string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Env = env
+
 	return cmd.Run()
 }
 
 func main() {
 	app := kingpin.New("aws-mfa", "A command-line wrapper for executing commands with AWS multi-factor authentication.")
 	app.HelpFlag.Short('h')
-	app.Version("0.1.0")
+	app.Version("0.1.1")
 	app.Author("Xavier Stevens <xavier.stevens@gmail.com>")
 
 	region := app.Flag("region", "AWS Region.").Default(getEnvWithDefault("AWS_DEFAULT_REGION", "us-west-2")).String()
@@ -115,5 +116,6 @@ func main() {
 	os.Setenv("AWS_SESSION_TOKEN", tmpCreds.SessionToken)
 
 	// execute command using modified environment
-	execCommandWithEnv(command, os.Environ())
+	err = execCommandWithEnv(command, os.Environ())
+	must(err)
 }
